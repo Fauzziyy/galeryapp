@@ -19,14 +19,16 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-                <a class="navbar-brand" href="#">Galery Fauzi</a>
+                <a class="navbar-brand" href="#" style="font-size: 24px; font-weight: bold; color: #007bff; text-transform: uppercase;">
+                    Galery Fauzi
+                </a>                
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     @if (Auth::check()== true)
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Beranda</a>
+                        <a class="nav-link active" aria-current="page" href="{{ route('beranda.index')}}">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Profile</a>
+                        <a class="nav-link" href="{{ route('profile') }}">Profile</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Album</a>
@@ -125,7 +127,7 @@
             </div>
                 <form class="d-flex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success me-2" type="submit">Search</button>
+                    <button class="btn btn-outline-primary me-2" type="submit">Search</button>
                     @if (Auth::check()==true)
                     <input type="text" value="{{ Auth::user()->name }}" readonly class="form-control me-2">
                     <a class="btn btn-danger" href="{{ route('users.logout')}}">Logout</a>

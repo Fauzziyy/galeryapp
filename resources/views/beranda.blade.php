@@ -1,9 +1,9 @@
 @extends('template.master')
 
 @section('content')
-    <div class="container mt-5">
+    <div class="container mt-5" style="font-family: 'Poppins', sans-serif;">
         <div class="text-center">
-            <h4>Halaman Beranda</h4>
+            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600;">WELCOME TO GALERY </h3>
         </div>
         @if (Auth::check() == true)
             <!-- Button trigger modal -->
@@ -103,7 +103,8 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col">
-                                <img src="..." id="foto" class="img-fluid" alt="...">
+                                <img src="..." id="foto" style="width:300px; height:250px;" class="img-fluid"
+                                    alt="...">
                             </div>
                             <div class="col">
                                 <label for="">Dibuat Oleh : </label>
@@ -142,8 +143,9 @@
                             style="text-align: center; width: 285px; height: 200px;" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">{{ $item->judul }}</h5>
-                            <p class="card-text">{{ $item->deskripsi }}</p>
-                            <p>{{ $item->user->nama_lengkap }}</p>
+                            <p class="short-text">{{ Str::limit($item->deskripsi, 25, '....') }}</p>
+                            <p class="full-text d-none">{{ $item->deskripsi }}</p>
+                            <a href="javascript:void(0)" class="btn btn-link read-more">More</a>
 
                             <hr>
                             <div class="btn-group" role="group" aria-label="Basic example">
@@ -169,7 +171,7 @@
                                                     stroke-linejoin="round" stroke-width="4"
                                                     d="M15 8C8.925 8 4 12.925 4 19c0 11 13 21 20 23.326C31 40 44 30 44 19c0-6.075-4.925-11-11-11c-3.72 0-7.01 1.847-9 4.674A10.99 10.99 0 0 0 15 8" />
                                             </svg>
-                                            <label for="">{{ $item->likes->count() }}</label>
+                                            <label for="" class="likeLabel" data-id="{{ $item->id }}">{{ $item->likes->count() }}</label>
                                         </button>
                                     @else
                                         {{-- button unlike --}}
@@ -180,7 +182,7 @@
                                                 <path fill="#f44336"
                                                     d="M34 9c-4.2 0-7.9 2.1-10 5.4C21.9 11.1 18.2 9 14 9C7.4 9 2 14.4 2 21c0 11.9 22 24 22 24s22-12 22-24c0-6.6-5.4-12-12-12" />
                                             </svg>
-                                            <label for="">{{ $item->likes->count() }}</label>
+                                            <label for="" class="likeLabel" data-id="{{ $item->id }}">{{ $item->likes->count() }}</label>
                                         </button>
                                     @endif
                                 @endif
@@ -219,6 +221,7 @@
                                         <rect width="24" height="24" fill="#2e2e2e"
                                             mask="url(#lineMdChatFilled0)" />
                                     </svg>
+                                    <label for="" class="komentarLabel" data-id="{{ $item->id }}">{{ $item->komentar->count() }}</label>
                                 </button>
                             </div>
 
@@ -243,7 +246,8 @@
                 $('#exampleModalLabel').text(judul);
                 $('#foto').attr('src', "{{ asset('storage/images/') }}/" + foto);
                 $('#name').text(author);
-                $('#deskripsi').text(deskripsi);
+                let wrapText = deskripsi.match(/.{1,25}/g).join("<br>");
+                $('#deskripsi').html(wrapText);
                 $('#judul').text(judul);
 
                 $.ajax({
@@ -256,14 +260,24 @@
                         id: id,
                     },
                     success: function(data) {
-                       
-                        var html = '<ul>';
+
+                        var html =
+                            '<div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">';
+                        html += '<ul style="list-style-type: none; padding: 0;">';
 
                         for (var i = 0; i < data.data.length; i++) {
-                            html += '<li>' + data.data[i].user.nama_lengkap + '</li> <br>';
-                            html += '' + data.data[i].komentar + '';
+                            html +=
+                                '<li style="margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #ddd;">';
+                            html += '<strong>' + data.data[i].user.nama_lengkap +
+                                ':</strong><br>';
+                            html += '<span>' + data.data[i].komentar + '</span>';
+                            html += '</li>';
                         }
+
                         html += '</ul>';
+                        html += '</div>';
+
+
                         //console.log(data.length);
                         $('#komentarAll').html(html);
                     }
@@ -319,7 +333,61 @@
                     }
                 });
             });
-
+            $(".read-more").click(function() {
+                let cardText = $(this).prevAll(".short-text");
+                let moreText = $(this).prevAll(".full-text");
+                if (moreText.hasClass("d-none")) {
+                    moreText.removeClass("d-none");
+                    cardText.addClass("d-none");
+                    $(this).text("Less");
+                } else {
+                    moreText.addClass("d-none");
+                    cardText.removeClass("d-none");
+                    $(this).text("More");
+                }
+            });
         });
     </script>
+
+<script>
+    function updateLikedanKomentar() {
+        $(".likeLabel").each(function() {
+            var id = $(this).data('id');
+            var label = $(this);
+            // alert(label);
+            $.ajax({
+                url: "{{ route('getUpdate') }}",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                method: "POST",
+                data: {
+                    id: id,
+                },
+                success: function(response) {
+                   label.text(response.likes);
+                }
+            });
+        });
+        $(".komentarLabel").each(function() {
+            var id = $(this).data('id');
+            var label = $(this);
+            $.ajax({
+                url: "{{ route('getUpdate') }}",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                method: "POST",
+                data: {
+                    id: id,
+                },
+                success: function(response) {
+                   label.text(response.komentar);
+                }
+            });
+        });
+    }
+    
+    setInterval(updateLikedanKomentar, 1000);
+</script>
 @endsection

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\FotoController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,9 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('beranda');
-});
+Route::get('/', [BerandaController::class, 'index'])->name('beranda.index');
 
 Route::middleware('auth')->group(function(){
     Route::get('users/logout', [UserController::class, 'logout'])->name('users.logout');
@@ -29,6 +28,13 @@ Route::middleware('auth')->group(function(){
     Route::post('unLike', [FotoController::class, 'unlike'])->name('unlike');
     Route::post('komentar', [FotoController::class,'komentar'])->name('komentar');
     Route::put('komentar/{id}',[FotoController::class, 'Detailkomentar'])->name('Detailkomentar');
+    Route::post('getUpdate', [BerandaController::class, 'getUpdate'])->name('getUpdate');
+    
+    //profile
+
+    Route::get('profile', [ProfileController::class, 'index'])->name('profile');
+    Route::Put('updateFoto/{id}', [ProfileController::class, 'updateFoto'])->name('updateFoto');
+    Route::Put('updateProfile/{id}', [ProfileController::class, 'updateProfile'])->name('updateProfile');
 });
 
 Route::resource('users', UserController::class);

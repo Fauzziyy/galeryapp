@@ -17,17 +17,27 @@ class BerandaController extends Controller
     {
         if (Auth::check()) {
             $album = AlbumFoto::where('users_id', Auth::user()->id)->get();
-            $fotos = Foto::with(['user','likes.user'])->get();
+            $fotos = Foto::with(['user','likes.user'])->orderBy('created_at','desc')->get();
 
             
         }else
         {  
             $album = null;
-            $fotos = Foto::with(['user','likes.user'])->get();
+            $fotos = Foto::with(['user','likes.user'])->orderBy('created_at','desc')->get();
 
         }
         //dd($fotos);
         return view('beranda', compact('album','fotos'));
+    
+    }
+
+    public function getUpdate(Request $request)
+    {
+        $fotos = Foto::find($request->id);
+       return response()->json([
+        'likes' => $fotos->likes->count(),
+        'komentar' => $fotos->komentar->count(),
+       ]);
     }
 
     /**

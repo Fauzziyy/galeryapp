@@ -24,4 +24,9 @@ class Foto extends Model
     {
         return $this->hasMany(LikeFoto::class, 'fotos_id');
     }
+
+    public function komentar()
+    {
+        return $this->hasMany(KomentarFoto::class,'fotos_id');
+    }
 }
